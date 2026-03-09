@@ -1,0 +1,145 @@
+{
+  "entities": {
+    "Member": {
+      "title": "Member",
+      "description": "A member of the motorcycle club",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Full name of the member" },
+        "role": { "type": "string", "description": "Role in the club (e.g., President, Member)" },
+        "bike": { "type": "string", "description": "Motorcycle model" },
+        "img": { "type": "string", "description": "URL to member's photo" },
+        "order": { "type": "number", "description": "Display order" }
+      },
+      "required": ["name", "role", "bike", "img"]
+    },
+    "AgendaEvent": {
+      "title": "Agenda Event",
+      "description": "An upcoming event for the club",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Title of the event" },
+        "date": { "type": "string", "description": "Date of the event" },
+        "time": { "type": "string", "description": "Time of the event" },
+        "type": { "type": "string", "description": "Category of the event" },
+        "desc": { "type": "string", "description": "Description of the event" },
+        "location": { "type": "string", "description": "Meeting location (optional)" },
+        "timestamp": { "type": "number", "description": "Unix timestamp for sorting" }
+      },
+      "required": ["title", "date", "time", "type", "desc"]
+    },
+    "PastEvent": {
+      "title": "Past Event",
+      "description": "A historical event of the club with a gallery",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Title of the past event" },
+        "date": { "type": "string", "description": "Date or month/year of the event" },
+        "img": { "type": "string", "description": "Main cover image URL" },
+        "images": { 
+          "type": "array", 
+          "items": { "type": "string" },
+          "description": "Gallery of images" 
+        },
+        "timestamp": { "type": "number", "description": "Unix timestamp for sorting" }
+      },
+      "required": ["title", "date", "img"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Club administrator",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "description": "Admin email" },
+        "role": { "type": "string", "description": "Admin role", "enum": ["admin"] }
+      },
+      "required": ["email", "role"]
+    },
+    "Contribution": {
+      "title": "Contribution",
+      "description": "A membership fee payment",
+      "type": "object",
+      "properties": {
+        "memberId": { "type": "string", "description": "ID of the member" },
+        "memberName": { "type": "string", "description": "Name of the member at time of payment" },
+        "amount": { "type": "number", "description": "Amount paid" },
+        "date": { "type": "string", "description": "Date of payment" },
+        "timestamp": { "type": "number", "description": "Unix timestamp" }
+      },
+      "required": ["memberId", "amount", "date"]
+    },
+    "Expense": {
+      "title": "Expense",
+      "description": "A club expense",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Description of the expense" },
+        "amount": { "type": "number", "description": "Amount spent" },
+        "date": { "type": "string", "description": "Date of expense" },
+        "timestamp": { "type": "number", "description": "Unix timestamp" }
+      },
+      "required": ["title", "amount", "date"]
+    },
+    "ShopItem": {
+      "title": "Shop Item",
+      "description": "An item for sale in the club shop",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Name of the item" },
+        "price": { "type": "number", "description": "Price of the item" },
+        "desc": { "type": "string", "description": "Description of the item" },
+        "img": { "type": "string", "description": "URL to item's photo" },
+        "category": { "type": "string", "description": "Category (e.g., Moto, Équipement)" },
+        "timestamp": { "type": "number", "description": "Unix timestamp for sorting" }
+      },
+      "required": ["title", "price", "img"]
+    },
+    "Stats": {
+      "title": "Stats",
+      "description": "Club statistics displayed on the home page",
+      "type": "object",
+      "properties": {
+        "activeMembers": { "type": "string", "description": "Number of active members" },
+        "annualRides": { "type": "string", "description": "Number of annual rides" },
+        "kilometers": { "type": "string", "description": "Kilometers ridden" },
+        "yearsActive": { "type": "string", "description": "Years active" },
+        "charityWorks": { "type": "string", "description": "Charity works" }
+      },
+      "required": ["activeMembers", "annualRides", "kilometers", "yearsActive", "charityWorks"]
+    }
+  },
+  "firestore": {
+    "/settings/stats": {
+      "schema": "Stats",
+      "description": "Singleton document for club statistics"
+    },
+    "/members/{memberId}": {
+      "schema": "Member",
+      "description": "Collection of club members"
+    },
+    "/agenda/{eventId}": {
+      "schema": "AgendaEvent",
+      "description": "Collection of upcoming events"
+    },
+    "/past_events/{eventId}": {
+      "schema": "PastEvent",
+      "description": "Collection of past events"
+    },
+    "/admins/{adminId}": {
+      "schema": "Admin",
+      "description": "Collection of administrators"
+    },
+    "/contributions/{contributionId}": {
+      "schema": "Contribution",
+      "description": "Collection of membership fee payments"
+    },
+    "/expenses/{expenseId}": {
+      "schema": "Expense",
+      "description": "Collection of club expenses"
+    },
+    "/shop_items/{itemId}": {
+      "schema": "ShopItem",
+      "description": "Collection of items for sale"
+    }
+  }
+}
