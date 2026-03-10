@@ -5,6 +5,139 @@ import { DragDropContext, Droppable, Draggable as DraggableBase, DropResult } fr
 const Draggable = DraggableBase as any;
 import { auth, db, googleProvider, signInWithPopup, signOut, onAuthStateChanged, collection, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, doc, signInWithEmailAndPassword, updatePassword, createUserWithEmailAndPassword, secondaryAuth, setDoc, getDoc } from './firebase';
 
+declare const cloudinary: any;
+
+const CloudinaryUploadButton = ({
+  value,
+  onChange,
+  label = "Choisir une photo",
+}: {
+  value: string,
+  onChange: (url: string) => void,
+  label?: string,
+}) => {
+  const handleUpload = () => {
+    const widget = cloudinary.createUploadWidget(
+      {
+        cloudName: 'dipmf3yd2',    // ← ton cloud name (déjà le bon)
+        uploadPreset: 'club_moto', // ← à créer dans Cloudinary (voir README ci-dessous)
+        multiple: false,
+        maxFiles: 1,
+        sources: ['local', 'camera'],
+        resourceType: 'image',
+        clientAllowedFormats: ['jpg', 'jpeg', 'png', 'webp'],
+        maxFileSize: 5000000,
+      },
+      (error: any, result: any) => {
+        if (!error && result && result.event === 'success') {
+          onChange(result.info.secure_url);
+        }
+      }
+    );
+    widget.open();
+  };
+
+  return (
+    <div className="space-y-2">
+      <button
+        type="button"
+        onClick={handleUpload}
+        className="w-full bg-zinc-800 border border-zinc-700 border-dashed p-3 rounded text-gray-300 hover:border-red-600 hover:text-white transition-all flex items-center justify-center gap-2 text-sm font-medium"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        {label}
+      </button>
+      {value && (
+        <div className="flex items-center gap-2 bg-black border border-zinc-800 p-2 rounded">
+          <img src={value} className="w-10 h-10 rounded object-cover shrink-0" referrerPolicy="no-referrer" />
+          <span className="text-gray-400 text-xs truncate flex-1">{value}</span>
+          <button type="button" onClick={() => onChange('')} className="text-gray-600 hover:text-red-500 shrink-0">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const CloudinaryGalleryUpload = ({
+  value,
+  onChange,
+}: {
+  value: string,
+  onChange: (urls: string) => void,
+}) => {
+  const currentUrls: string[] = value
+    ? value.split(',').map((s: string) => s.trim()).filter(Boolean)
+    : [];
+
+  const handleUpload = () => {
+    const widget = cloudinary.createUploadWidget(
+      {
+        cloudName: 'dipmf3yd2',
+        uploadPreset: 'club_moto',
+        multiple: true,
+        maxFiles: 20,
+        sources: ['local', 'camera'],
+        resourceType: 'image',
+        clientAllowedFormats: ['jpg', 'jpeg', 'png', 'webp'],
+        maxFileSize: 5000000,
+      },
+      (error: any, result: any) => {
+        if (!error && result && result.event === 'success') {
+          const newUrls = [...currentUrls, result.info.secure_url];
+          onChange(newUrls.join(', '));
+        }
+      }
+    );
+    widget.open();
+  };
+
+  const removeImage = (index: number) => {
+    const newUrls = currentUrls.filter((_: string, i: number) => i !== index);
+    onChange(newUrls.join(', '));
+  };
+
+  return (
+    <div className="space-y-2">
+      <button
+        type="button"
+        onClick={handleUpload}
+        className="w-full bg-zinc-800 border border-zinc-700 border-dashed p-3 rounded text-gray-300 hover:border-red-600 hover:text-white transition-all flex items-center justify-center gap-2 text-sm font-medium"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+        </svg>
+        Ajouter des photos à la galerie
+      </button>
+      {currentUrls.length > 0 && (
+        <div className="flex flex-wrap gap-2 mt-2">
+          {currentUrls.map((url: string, i: number) => (
+            <div key={i} className="relative group">
+              <img src={url} className="w-16 h-16 rounded object-cover border border-zinc-700" referrerPolicy="no-referrer" />
+              <button
+                type="button"
+                onClick={() => removeImage(i)}
+                className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 rounded-full text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      {currentUrls.length > 0 && (
+        <p className="text-gray-600 text-xs">{currentUrls.length} photo(s) dans la galerie</p>
+      )}
+    </div>
+  );
+};
 // --- Error Handling ---
 
 const Reveal = ({ children, className = "", ...props }: { children: React.ReactNode, className?: string, [key: string]: any }) => {
@@ -1412,7 +1545,7 @@ const AdminDashboard = ({
                 <input type="text" placeholder="Nom" required className="w-full bg-black border border-zinc-800 p-3 rounded text-white" value={memberForm.name || ''} onChange={e => setMemberForm({...memberForm, name: e.target.value})} />
                 <input type="text" placeholder="Rôle" required className="w-full bg-black border border-zinc-800 p-3 rounded text-white" value={memberForm.role || ''} onChange={e => setMemberForm({...memberForm, role: e.target.value})} />
                 <input type="text" placeholder="Moto" required className="w-full bg-black border border-zinc-800 p-3 rounded text-white" value={memberForm.bike || ''} onChange={e => setMemberForm({...memberForm, bike: e.target.value})} />
-                <input type="url" placeholder="URL Image" required className="w-full bg-black border border-zinc-800 p-3 rounded text-white" value={memberForm.img || ''} onChange={e => setMemberForm({...memberForm, img: e.target.value})} />
+                <CloudinaryUploadButton value={memberForm.img || ''} onChange={(url) => setMemberForm({...memberForm, img: url})} label="Photo du membre" />
                 <input type="text" placeholder="Citation (optionnelle)" className="w-full bg-black border border-zinc-800 p-3 rounded text-white" value={memberForm.quote || ''} onChange={e => setMemberForm({...memberForm, quote: e.target.value})} />
                 <div className="flex gap-2">
                   <button type="submit" className="flex-1 bg-red-600 py-3 font-bold uppercase tracking-widest hover:bg-red-700 transition-all">
@@ -1540,13 +1673,11 @@ const AdminDashboard = ({
                 <input type="text" placeholder="Titre" required className="w-full bg-black border border-zinc-800 p-3 rounded text-white" value={pastForm.title || ''} onChange={e => setPastForm({...pastForm, title: e.target.value})} />
                 <input type="date" required className="w-full bg-black border border-zinc-800 p-3 rounded text-white" value={pastForm.date || ''} onChange={e => setPastForm({...pastForm, date: e.target.value})} />
                 <textarea placeholder="Description" className="w-full bg-black border border-zinc-800 p-3 rounded text-white h-24" value={pastForm.desc || ''} onChange={e => setPastForm({...pastForm, desc: e.target.value})} />
-                <input type="url" placeholder="URL Image Principale" required className="w-full bg-black border border-zinc-800 p-3 rounded text-white" value={pastForm.img || ''} onChange={e => setPastForm({...pastForm, img: e.target.value})} />
-                <textarea 
-                  placeholder="URLs Galerie (séparées par des virgules)" 
-                  className="w-full bg-black border border-zinc-800 p-3 rounded text-white h-24" 
-                  value={Array.isArray(pastForm.images) ? pastForm.images.join(', ') : (pastForm.images || '')} 
-                  onChange={e => setPastForm({...pastForm, images: e.target.value})} 
-                />
+                <CloudinaryUploadButton value={pastForm.img || ''} onChange={(url) => setPastForm({...pastForm, img: url})} label="Photo principale de l'événement" />
+<CloudinaryGalleryUpload 
+  value={Array.isArray(pastForm.images) ? pastForm.images.join(', ') : (pastForm.images || '')} 
+  onChange={(urls) => setPastForm({...pastForm, images: urls})} 
+/>
                 <div className="flex gap-2">
                   <button type="submit" className="flex-1 bg-red-600 py-3 font-bold uppercase tracking-widest hover:bg-red-700 transition-all">
                     {editingPastId ? 'Enregistrer' : 'Ajouter'}
@@ -1612,7 +1743,7 @@ const AdminDashboard = ({
                   <option value="Consommables">Consommables</option>
                 </select>
                 <input type="text" placeholder="Contact Vendeur (ex: +261 ...)" required className="w-full bg-black border border-zinc-800 p-3 rounded text-white" value={shopForm.contact || ''} onChange={e => setShopForm({...shopForm, contact: e.target.value})} />
-                <input type="url" placeholder="URL Image" required className="w-full bg-black border border-zinc-800 p-3 rounded text-white" value={shopForm.img || ''} onChange={e => setShopForm({...shopForm, img: e.target.value})} />
+                <CloudinaryUploadButton value={shopForm.img || ''} onChange={(url) => setShopForm({...shopForm, img: url})} label="Photo de l'article" />
                 <textarea placeholder="Description" required className="w-full bg-black border border-zinc-800 p-3 rounded text-white h-24" value={shopForm.desc || ''} onChange={e => setShopForm({...shopForm, desc: e.target.value})} />
                 <div className="flex gap-2">
                   <button type="submit" className="flex-1 bg-red-600 py-3 font-bold uppercase tracking-widest hover:bg-red-700 transition-all">
