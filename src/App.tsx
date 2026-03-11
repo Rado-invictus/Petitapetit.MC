@@ -164,6 +164,18 @@ const formatDate = (dateStr: string) => {
   ];
   return `${day} ${months[parseInt(month) - 1]} ${year}`;
 };
+const getDaysRemaining = (dateStr: string) => {
+  if (!dateStr) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const eventDate = new Date(dateStr);
+  eventDate.setHours(0, 0, 0, 0);
+  const diff = Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  if (diff < 0) return "Passé";
+  if (diff === 0) return "Aujourd'hui !";
+  if (diff === 1) return "Demain !";
+  return `${diff} jours restants`;
+};
 
 const LoginModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
   const [identifiant, setIdentifiant] = useState('');
@@ -786,8 +798,9 @@ const Agenda = ({ events }: { events: AgendaEvent[] }) => {
               <div className="flex justify-between items-start mb-4">
                 <span className="text-red-600 font-bold text-sm uppercase tracking-widest">{event.type}</span>
                 <div className="text-right">
-                  <div className="text-white font-bold">{formatDate(event.date)}</div>
-                  <div className="text-gray-500 text-sm">{event.time}</div>
+<div className="text-white font-bold">{formatDate(event.date)}</div>
+<div className="text-red-500 text-xs font-bold uppercase tracking-widest">{getDaysRemaining(event.date)}</div>
+<div className="text-gray-500 text-sm">{event.time}</div>
                 </div>
               </div>
               <h3 className="text-2xl font-black text-white uppercase italic mb-4 group-hover:text-red-500 transition-colors">{event.title}</h3>
