@@ -168,7 +168,8 @@ const getDaysRemaining = (dateStr: string) => {
   if (!dateStr) return null;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const eventDate = new Date(dateStr);
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const eventDate = new Date(year, month - 1, day);
   eventDate.setHours(0, 0, 0, 0);
   const diff = Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   if (diff < 0) return "Passé";
