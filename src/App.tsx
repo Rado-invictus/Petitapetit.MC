@@ -165,6 +165,7 @@ const formatDate = (dateStr: string) => {
   return `${day} ${months[parseInt(month) - 1]} ${year}`;
 };
 const getDaysRemaining = (dateStr: string) => {
+  console.log('date reçue:', dateStr); 
   if (!dateStr) return null;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
