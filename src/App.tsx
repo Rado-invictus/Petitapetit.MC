@@ -644,7 +644,7 @@ const Footer = () => (
   </footer>
 );
 
-const Home = ({ setActiveTab, stats }: { setActiveTab: (tab: string) => void, stats: Stats }) => (
+const Home = ({ setActiveTab, stats, members }: { setActiveTab: (tab: string) => void, stats: Stats, members: Member[] }) => (
   <div className="pt-20">
     {/* Hero Section */}
     <section className="relative h-[90vh] flex items-center justify-center overflow-hidden">
@@ -723,7 +723,7 @@ const Home = ({ setActiveTab, stats }: { setActiveTab: (tab: string) => void, st
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 text-center">
           {[
-            { label: 'Membres Actifs', value: stats.activeMembers },
+            { label: 'Membres Actifs', value: String(members.length) },
             { label: 'Sorties Annuelles', value: stats.annualRides },
             { label: 'Kilomètres Parcourus', value: stats.kilometers },
             { label: 'Années d\'Existence', value: stats.yearsActive },
@@ -2179,7 +2179,7 @@ function AppContent() {
     if (loading) return <div className="pt-40 text-center text-red-600 animate-pulse font-black italic uppercase tracking-widest">Chargement...</div>;
 
     switch (activeTab) {
-      case 'home': return <Home setActiveTab={setActiveTab} stats={stats} />;
+      case 'home': return <Home setActiveTab={setActiveTab} stats={stats} members={members} />;
       case 'agenda': return <Agenda events={agenda} />;
       case 'shop': return <Shop shopItems={shopItems} />;
       case 'members': return <Members members={members} />;
